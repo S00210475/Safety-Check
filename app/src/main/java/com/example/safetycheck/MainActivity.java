@@ -14,7 +14,6 @@ import android.widget.Toast;
 
 import java.util.Properties;
 
-import javax.mail.Authenticator;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
@@ -69,44 +68,40 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendEmail() {
-        final String username = "safetycheckapplication@gmail.com";
-        final String password = "GDSC2023";
-        String to = "safetycheckapplication@gmail.com";
-        String subject = "User did not make their safety check";
-        String message = "This is test code for safety check";
+        Log.i("Test", "Send Email Start");
+        String host="mail.javatpoint.com";
+        final String user="safetycheckapplication@gmail.com";//change accordingly
+        final String password="GDSC2023";//change accordingly
 
+        String to="chriscurran01@gmail.com";//change accordingly
+        Log.i("Test", "Properties Start");
+        //Get the session object
+        Properties props = new Properties();
+        props.put("mail.smtp.host",host);
+        props.put("mail.smtp.auth", "true");
+        Log.i("Test", "Session start");
+        Session session = Session.getDefaultInstance(props,
+                new javax.mail.Authenticator() {
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(user,password);
+                    }
+                });
+        Log.i("Test", "Message Start");
+        //Compose the message
+        //This code is not working as intended, will be resorting to cloud functions in future
         try {
-            Properties props = new Properties();
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.host", "smtp.gmail.com");
-            props.put("mail.smtp.port", "587");
+            MimeMessage message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(user));
+            message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(to));
 
-            Session session = Session.getInstance(props,
-                    new Authenticator() {
-                        protected PasswordAuthentication getPasswordAuthentication() {
-                            return new PasswordAuthentication(username, password);
-                        }
-                    });
+            message.setSubject("javatpoint");
+            message.setText("This is simple program of sending email using JavaMail API");
+            Log.i("Test", "Sending Email");
+            //send the message
+            Transport.send(message);
 
-            MimeMessage msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(username));
-            msg.setRecipients(MimeMessage.RecipientType.TO, InternetAddress.parse(to));
-            msg.setSubject(subject);
-            msg.setText(message);
+            Log.i("Test", "Sent Email");
 
-            Transport.send(msg);
-            runOnUiThread(new Runnable() {
-                public void run() {
-                    Toast.makeText(MainActivity.this, "Email sent", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } catch (MessagingException e) {
-            runOnUiThread(new Runnable() {
-                public void run() {
-                    Toast.makeText(MainActivity.this, "Error sending email", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
+        } catch (MessagingException e) {e.printStackTrace();}
     }
 }
